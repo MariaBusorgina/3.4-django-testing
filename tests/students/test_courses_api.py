@@ -29,7 +29,8 @@ def create_student():
 @pytest.mark.django_db
 def test_create_course(client, create_course):
     messages = create_course(_quantity=10)
-    response = client.get('/courses/1/')
+    id = messages[0].id
+    response = client.get(f'/courses/{id}/')
     assert response.status_code == 200
     data = response.json()
     assert data.get('name') == messages[0].name
@@ -49,7 +50,7 @@ def test_get_list_course(client, create_course):
 # тест успешного создания курса (здесь фабрика не нужна, готовим JSON-данные и создаем курс)
 @pytest.mark.django_db
 def test_create_new_course(client):
-    Course.objects.create(name='Python')
+    client.post('/courses/', {'name': 'Python'})
     response = client.get('/courses/')
     assert response.status_code == 200
     data = response.json()[0]['name']
@@ -60,7 +61,8 @@ def test_create_new_course(client):
 @pytest.mark.django_db
 def test_update_course(client, create_course):
     messages = create_course(_quantity=1)
-    request = client.patch('/courses/1/', data={'name': 'S'})
+    id = messages[0].id
+    request = client.patch(f'/courses/{id}/', data={'name': 'S'})
     assert request.status_code == 200
     response = client.get('/courses/')
     assert response.status_code == 200
@@ -72,7 +74,8 @@ def test_update_course(client, create_course):
 @pytest.mark.django_db
 def test_delete_course(client, create_course):
     messages = create_course(_quantity=1)
-    request = client.delete('/courses/1/')
+    id = messages[0].id
+    request = client.delete(f'/courses/{id}/')
     assert request.status_code == 204
     response = client.get('/courses/')
     assert response.status_code == 200
@@ -85,7 +88,8 @@ def test_delete_course(client, create_course):
 @pytest.mark.django_db
 def test_courses_list_filters_id(client, create_course):
     messages = create_course(_quantity=10)
-    response = client.get('/courses/?id=1')
+    id = messages[0].id
+    response = client.get(f'/courses/?id={id}')
     assert response.status_code == 200
     data = response.json()
     assert data[0]['id'] == messages[0].id
